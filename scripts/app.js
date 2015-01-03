@@ -1,4 +1,4 @@
-;(function() {
+;(function(module) {
   var renderer
     , scene 
     , camera
@@ -11,46 +11,6 @@
     , roll    = 0
     , vessel  = null
   ;
-
-  var primus = Primus.connect('http://localhost:3000/signalk/stream');
-
-  primus.on('data', function(data) {
-    deriveData(data);
-
-    $('#heading').html(heading);
-    $('#pitch').html(pitch);
-    $('#roll').html(roll);
-  });
-
-  function deriveData(data) {
-    if(vessel === null) {
-      for(var id in data.vessels) {
-        var ves = data.vessels[id];
-
-        if(ves.navigation !== null && typeof ves.navigation === 'object') {
-          if(typeof ves.navigation.courseOverGroundTrue !== 'undefined') {
-            vessel = id;
-          }
-        }
-      }
-    }
-
-    data = data.vessels[vessel];
-
-    if(data.navigation !== null && typeof data.navigation === 'object') {
-      if(data.navigation.courseOverGroundTrue !== null && typeof data.navigation.courseOverGroundTrue === 'object') {
-        heading = data.navigation.courseOverGroundTrue.value;
-      }
-
-      if(data.navigation.pitch !== null && typeof data.navigation.pitch === 'object') {
-        pitch = data.navigation.pitch.value;
-      }
-
-      if(data.navigation.roll !== null && typeof data.navigation.roll === 'object') {
-        roll = data.navigation.roll.value;
-      }
-    }
-  }
 
   function createSphere() {
     var geometry    = new THREE.SphereGeometry(2, 50, 50);
@@ -84,9 +44,13 @@
     scene.add(torus);
   }
 
-  function init() {
+  function init(canvas, width, height) {
+    canvas    = typeof canvas === 'string' ? $(canvas) : canvas;
+    width     = width || $(window).width();
+    height    = height || $(window).height();
+
     scene     = new THREE.Scene();
-    camera    = new THREE.PerspectiveCamera(75, $(window).width() / $(window).height(), 0.01, 10000);
+    camera    = new THREE.PerspectiveCamera(75, width / height, 0.01, 10000);
     renderer  = new THREE.WebGLRenderer();
     light     = new THREE.AmbientLight(0xEEEEEE);
 
@@ -96,12 +60,18 @@
     renderer.setSize($(window).width(), $(window).height());
     renderer.setClearColor(0x003300, 1);
 
-    $('main').empty().append(renderer.domElement);
+    canvas.empty().append(renderer.domElement);
     
     createSphere();
     addMainNeedle(0x00CC00);
     addRing();
     animate();
+  }
+
+  function resizeScene(width, height) {
+    renderer.setSize(width, height);
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
   }
 
   function calculateRotation() {
@@ -134,5 +104,17 @@
     render();
   }
 
-  init();
-})();
+  function updateVariables(h, p, r) {
+    heading = h || 0.0;
+    pitch = p || 0.0;
+    roll = r || 0.0;
+  }
+
+  if(module !== null && typeof module === 'object' && typeof module.exports !== 'undefined') {
+    module.exports = {
+      init: init,
+      update: updateVariables,
+      resize: resizeScene
+    };
+  }
+})(module);

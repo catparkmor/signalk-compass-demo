@@ -1,0 +1,19 @@
+{
+  "name": "signalk-compass",
+  "version": "0.1.0",
+  "description": "signalk-compass",
+  "main": "scripts/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SignalK/signalk-compass-demo.git"
+  },
+  "author": "Fabian Tollenaar <fabian@starting-point.nl>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SignalK/signalk-compass-demo/issues"
+  },
+  "homepage": "https://github.com/SignalK/signalk-compass-demo"
+}
